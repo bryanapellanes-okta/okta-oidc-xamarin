@@ -5,6 +5,8 @@ pool:
 variables:
   buildConfiguration: 'Release'
   outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
+  androidOutputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)/Android'
+  iOSOutputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)/iOS'
 
 steps:
 - task: NuGetToolInstaller@0
@@ -16,12 +18,13 @@ steps:
 - task: XamarinAndroid@1
   inputs:
     projectFile: '**/*droid*.csproj'
-    outputDirectory: '$(outputDirectory)'
+    outputDirectory: '$(androidOutputDirectory)'
     configuration: '$(buildConfiguration)'  
 
 - task: XamariniOS@2
   inputs:
-    solutionFile: '**/*iOS.csproj'
+    projectFile: '**/*iOS.csproj'
+    outputDirectory: '$(iOSOutputDirectory)'
     configuration: '$(buildConfiguration)'
     packageApp: false
     buildForSimulator: true    
