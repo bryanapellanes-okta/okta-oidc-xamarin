@@ -24,7 +24,7 @@ steps:
 - task: XamariniOS@2
   inputs:
     solutionFile: '**/*iOS.csproj'
-    outputDirectory: '$(iOSOutputDirectory)'
+    outputPath: '$(iOSOutputDirectory)'
     configuration: '$(buildConfiguration)'
     packageApp: false
     buildForSimulator: true    
