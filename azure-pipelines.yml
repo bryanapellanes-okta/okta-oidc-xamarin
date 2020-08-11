@@ -1,0 +1,27 @@
+# https://docs.microsoft.com/azure/devops/pipelines/ecosystems/xamarin
+pool:
+  vmImage: 'macOS-10.15' # For Windows, use 'windows-2019'
+
+variables:
+  buildConfiguration: 'Release'
+  outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
+
+steps:
+- task: NuGetToolInstaller@0
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '**/*.sln'
+
+- task: XamarinAndroid@1
+  inputs:
+    projectFile: '**/*droid*.csproj'
+    outputDirectory: '$(outputDirectory)'
+    configuration: '$(buildConfiguration)'  
+
+- task: XamariniOS@2
+  inputs:
+    solutionFile: '**/*iOS.csproj'
+    configuration: '$(buildConfiguration)'
+    packageApp: false
+    buildForSimulator: true    
