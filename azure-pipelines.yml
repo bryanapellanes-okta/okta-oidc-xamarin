@@ -26,5 +26,5 @@ steps:
     solutionFile: '**/*iOS.csproj'
     outputPath: '$(iOSOutputDirectory)'
     configuration: '$(buildConfiguration)'
-    packageApp: false
-    buildForSimulator: true    
+    packageApp: true
+    buildForSimulator: false    
