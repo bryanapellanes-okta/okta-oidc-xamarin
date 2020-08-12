@@ -9,6 +9,8 @@ variables:
   iOSOutputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)/iOS'
 
 steps:
+- checkout: self
+  persistCredentials: true
 - task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
