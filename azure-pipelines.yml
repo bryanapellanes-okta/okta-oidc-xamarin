@@ -30,3 +30,13 @@ steps:
     configuration: '$(buildConfiguration)'
     packageApp: true
     buildForSimulator: false    
+
+- task: Bash@3
+  name: Push Nuget Packages to GitHub
+  inputs:
+    targetType: 'inline'
+    script: | # https://github.com/okta/okta-oidc-xamarin.git
+      git remote add github https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@github.com/okta/okta-oidc-xamarin.git
+  env:
+    GITHUB_USERNAME: $(GITHUB_USERNAME)
+    GITHUB_ACCESS_TOKEN: $(GITHUB_ACCESS_TOKEN)
