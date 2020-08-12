@@ -32,7 +32,7 @@ steps:
     buildForSimulator: false    
 
 - task: Bash@3
-  name: Push Nuget Packages to GitHub
+  name: PushNugetPackagesToGitHub
   inputs:
     targetType: 'inline'
     script: | # https://github.com/okta/okta-oidc-xamarin.git
