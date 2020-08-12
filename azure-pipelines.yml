@@ -32,11 +32,19 @@ steps:
     buildForSimulator: false    
 
 - task: Bash@3
-  name: PushNugetPackagesToGitHub
+  name: CakeBuildAndroid
   inputs:
-    targetType: 'inline'
-    script: | # https://github.com/okta/okta-oidc-xamarin.git
-      git remote add github https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@github.com/okta/okta-oidc-xamarin.git
+    targetType: 'filePath'
+    filePath: './build-android.sh'
+  env:
+    GITHUB_USERNAME: $(GITHUB_USERNAME)
+    GITHUB_ACCESS_TOKEN: $(GITHUB_ACCESS_TOKEN)
+
+- task: Bash@3
+  name: CakeBuildiOS
+  inputs:
+    targetType: 'filePath'
+    filePath: './build-iOS.sh'
   env:
     GITHUB_USERNAME: $(GITHUB_USERNAME)
     GITHUB_ACCESS_TOKEN: $(GITHUB_ACCESS_TOKEN)
