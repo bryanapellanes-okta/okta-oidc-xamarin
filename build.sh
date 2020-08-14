@@ -133,11 +133,3 @@ fi
 # Start Cake
 echo "$CAKE_EXE" $SCRIPT "${CAKE_ARGUMENTS[@]}"
 mono "$CAKE_EXE" $SCRIPT "${CAKE_ARGUMENTS[@]}"
-
-if [ -f "./post_build.sh" ]; then
-    echo "Running post_build.sh"
-    ./post_build.sh
-else
-    echo "post_build.sh script not found"
-    echo "build complete"
-fi

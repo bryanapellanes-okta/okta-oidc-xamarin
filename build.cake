@@ -20,6 +20,44 @@ var iOSOutputDirectory = Directory(System.IO.Path.Combine(artifactsDirectory, "i
 // Tests.
 var testsProject = GetFiles("./Okta.Xamarin/Okta.Xamarin.Test/*.csproj").First();
 
+// Android Nuget functions
+Func<string[]> getAndroidReleaseNotes = ()=>
+{
+    // TODO: define a way to get release notes from the file system and/or git commits
+    return new string[]{"", ""}; 
+};
+Func<string[]> getAndroidTags = ()=>
+{
+    // TODO: define a way to get tags from the file system and/or git commits
+    return new string[]{"okta", "token", "authentication", "authorization", "oauth", "sso", "oidc"}; 
+};
+Func<NuSpecContent[]> getAndroidFiles = ()=>
+{
+    // TODO: define algorithm to build NuSpecContent array from convention based relative path from artifacts dir
+    return new [] { 
+        new NuSpecContent {Source = "artifacts/Android/Okta.Xamarin.Android.dll", Target = "lib/MonoAndroid10"} 
+    };
+};
+
+// iOS Nuget functions
+Func<string[]> getiOSReleaseNotes = ()=>
+{
+    // TODO: define a way to get release notes from the file system and/or git commits
+    return new string[]{"", ""}; 
+};
+Func<string[]> getiOSTags = ()=>
+{
+    // TODO: define a way to get tags from the file system and/or git commits
+    return new string[]{"okta", "token", "authentication", "authorization", "oauth", "sso", "oidc"}; 
+};
+Func<NuSpecContent[]> getiOSFiles = ()=>
+{
+    // TODO: define algorithm to build NuSpecContent array from convention based relative path from artifacts dir
+    return new [] { 
+        new NuSpecContent {Source = "artifacts/iOS/Okta.Xamarin.iOS.dll", Target = "lib/Xamarin.iOS10"} 
+    };
+};
+
 Task("Clean")
     .Does(() => 
     {
@@ -80,6 +118,33 @@ Task("Build-Android")
                 .SetVerbosity(Verbosity.Minimal));
     });
 
+Task("Pack-Android")
+    .IsDependentOn("Build-Android")
+    .Does(() =>
+    {
+        var nuGetPackSettings   = new NuGetPackSettings { 
+                                Id                      = "Okta.Xamarin.Android", 
+                                Version                 = "0.0.0.1", 
+                                Authors                 = new[] {"Okta, Inc."},
+                                Owners                  = new[] {"Okta, Inc."},
+                                Description             = "Official Okta OIDC SDK for Xamarin Android applications.",
+                                ProjectUrl              = new Uri("https://github.com/okta/okta-oidc-xamarin"),
+                                IconUrl                 = new Uri("https://raw.githubusercontent.com/okta/okta-sdk-dotnet/master/icon.png"),
+                                LicenseUrl              = new Uri("https://github.com/okta/okta-oidc-dotnet/blob/master/LICENSE.md"),
+                                Copyright               = "(c) 2020 Okta, Inc.",
+                                ReleaseNotes            = getAndroidReleaseNotes(), 
+                                Tags                    = getAndroidTags(), 
+                                RequireLicenseAcceptance= false, 
+                                Symbols                 = false, 
+                                NoPackageAnalysis       = true, 
+                                Files                   = getAndroidFiles(), 
+                                BasePath                = ".", 
+                                OutputDirectory         = androidOutputDirectory 
+                            }; 
+
+        NuGetPack(nuGetPackSettings);
+    });
+
 Task("Build-iOS")
     .IsDependentOn("Restore-Packages")
     .Does (() =>
@@ -92,6 +157,33 @@ Task("Build-iOS")
                 .WithProperty("OutputPath", iOSOutputDirectory)
                 .WithProperty("TreatWarningsAsErrors", "false")
                 .SetVerbosity(Verbosity.Minimal));
+    });
+
+Task("Pack-iOS")
+    .IsDependentOn("Build-iOS")
+    .Does(() =>
+    {
+        var nuGetPackSettings   = new NuGetPackSettings { 
+                                Id                      = "Okta.Xamarin.iOS", 
+                                Version                 = "0.0.0.1", 
+                                Authors                 = new[] {"Okta, Inc."},
+                                Owners                  = new[] {"Okta, Inc."},
+                                Description             = "Official Okta OIDC SDK for Xamarin iOS applications.",
+                                ProjectUrl              = new Uri("https://github.com/okta/okta-oidc-xamarin"),
+                                IconUrl                 = new Uri("https://raw.githubusercontent.com/okta/okta-sdk-dotnet/master/icon.png"),
+                                LicenseUrl              = new Uri("https://github.com/okta/okta-oidc-dotnet/blob/master/LICENSE.md"),
+                                Copyright               = "(c) 2020 Okta, Inc.",
+                                ReleaseNotes            = getiOSReleaseNotes(), 
+                                Tags                    = getiOSTags(), 
+                                RequireLicenseAcceptance= false, 
+                                Symbols                 = false, 
+                                NoPackageAnalysis       = true, 
+                                Files                   = getiOSFiles(), 
+                                BasePath                = ".", 
+                                OutputDirectory         = iOSOutputDirectory 
+                            }; 
+
+        NuGetPack(nuGetPackSettings);
     });
 
 Task("Run-Tests")
@@ -114,17 +206,22 @@ Task("CommonTarget")
 Task("AndroidTarget")
     .IsDependentOn("Clean")
     .IsDependentOn("Build-Android")
-    .IsDependentOn("Run-Tests");
+    .IsDependentOn("Run-Tests")
+    .IsDependentOn("Pack-Android");
 
 Task("iOSTarget")
     .IsDependentOn("Clean")
     .IsDependentOn("Build-iOS")
-    .IsDependentOn("Run-Tests");
+    .IsDependentOn("Run-Tests")
+    .IsDependentOn("Pack-iOS");
 
 Task("DefaultTarget")
     .IsDependentOn("Clean")
-    .IsDependentOn("Build-Solution")
-    .IsDependentOn("Run-Tests");
+    .IsDependentOn("Build-Android")
+    .IsDependentOn("Build-iOS")
+    .IsDependentOn("Run-Tests")
+    .IsDependentOn("Pack-Android")
+    .IsDependentOn("Pack-iOS");
 
 Console.WriteLine("Cake target is " + target);
 RunTarget(target);

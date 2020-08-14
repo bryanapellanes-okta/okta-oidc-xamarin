@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>Okta.Xamarin</id>
+    <version>1.0.0</version>
+    <authorsOkta, Inc.</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/okta/okta-oidc-xamarin/</projectUrl>    
+    <!-- <releaseNotes>Summary of changes made in this release of the package.</releaseNotes> -->
+    <copyright>2019 Okta, Inc.</copyright>
+    <tags>okta,token,authentication,authorization</tags>
+    <dependencies>
+        <group targetFramework="MonoAndroid">
+            <!--MonoAndroid dependencies go here-->
+        </group>
+        <group targetFramework="Xamarin.iOS10">
+            <!--Xamarin.iOS10 dependencies go here-->
+        </group>
+        <group targetFramework="uap">
+            <!--uap dependencies go here-->
+        </group>
+    </dependencies>
+  </metadata>
+</package>

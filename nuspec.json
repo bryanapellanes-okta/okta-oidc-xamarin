@@ -1,0 +1,24 @@
+{ 
+                                      "Id"                      : "TestNuGet", 
+                                      "Version"                 : "0.0.0.1", 
+                                      "Title"                   : "The tile of the package", 
+                                      "Authors"                 : ["John Doe"], 
+                                      "Owners"                  : ["Contoso"], 
+                                      "Description"             : "The description of the package", 
+                                      "Summary"                 : "Excellent summary of what the package does", 
+                                      "ProjectUrl"              : "https://github.com/SomeUser/TestNuGet/", 
+                                      "IconUrl"                 : "http://cdn.rawgit.com/SomeUser/TestNuGet/master/icons/testNuGet.png", 
+                                      "LicenseUrl"              : "https://github.com/SomeUser/TestNuGet/blob/master/LICENSE.md", 
+                                      "Copyright"               : "Some company 2015", 
+                                      "ReleaseNotes"            : ["Bug fixes", "Issue fixes", "Typos"] , 
+                                      "Tags"                    : ["Cake","Script","Build"], 
+                                      "RequireLicenseAcceptance" : false, 
+                                      "Symbols"                 : false, 
+                                      "NoPackageAnalysis"       : true, 
+                                      "Files"                   = new [] { 
+                                                                           new NuSpecContent {Source = "bin/TestNuGet.dll", Target = "bin"
+        },
+    }, 
+                                      BasePath                = "./src/TestNuGet/bin/release", 
+                                      OutputDirectory         = "./NuGet"
+}
