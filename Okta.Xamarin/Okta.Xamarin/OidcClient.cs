@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,15 +15,25 @@ using System.Threading.Tasks;
 namespace Okta.Xamarin
 {
     /// <summary>
-    /// A client for logging into Okta via Oidc
+    /// A client for logging into Okta via Oidc.
     /// </summary>
-    public partial class OidcClient : IOidcClient
+    public class OidcClient : IOidcClient
     {
+        public OidcClient(IOktaConfig oktaConfig, OktaConfigValidator<IOktaConfig> oktaConfigValidator = null)
+        {
+            this.Config = oktaConfig;
+            this.Validator = oktaConfigValidator ?? new OktaConfigValidator<IOktaConfig>();
+            this.client = new HttpClient();
+			ValidateConfig();
+        }
+
+		public string RuntimePlatform{ get; protected set; }
+
         OAuthException oauthException;
         /// <summary>
         /// Gets the OAuthException that occurred if any.  Will be null if no exception occurred.
         /// </summary>
-        public OAuthException OAuthException 
+        public OAuthException OAuthException
         {
             get
             {
@@ -48,14 +59,34 @@ namespace Okta.Xamarin
         internal static Dictionary<string, IOidcClient> loggingOutClientsByState = new Dictionary<string, IOidcClient>();
 
         /// <summary>
-        /// The <see cref="HttpClient"/> for use in getting an auth token.  Microsoft guidance specifies that this should be reused for performance reasons.
-        /// </summary>
-        private HttpClient client = new HttpClient();
-
-        /// <summary>
         /// A <see cref="OktaConfigValidator"/> used to validate any configuration used by Clients
         /// </summary>
-        private static readonly OktaConfigValidator<IOktaConfig> validator = new OktaConfigValidator<IOktaConfig>();
+        public OktaConfigValidator<IOktaConfig> Validator { get; set; }
+
+        /// <summary>
+        /// The <see cref="HttpClient"/> for use in getting an auth token.  Microsoft guidance specifies that this should be reused for performance reasons.
+        /// </summary>
+        protected HttpClient client { get; set; }
+        /// <summary>
+        /// Launches a browser to the specified url
+        /// </summary>
+        /// <param name="url">The url to launch in a Chrome custom tab</param>
+        protected virtual void LaunchBrowser(string url) 
+        {
+            OnLaunchBrowser?.Invoke(url);
+        }
+        /// <summary>
+        /// A hook that is called when launching the browser
+        /// </summary>
+        public Action<string> OnLaunchBrowser { get; set; }
+
+        /// A hook that is called when closing the browser
+        /// </summary>
+        public Action OnCloseBrowser { get; set; }
+        protected virtual void CloseBrowser()
+        {
+            OnCloseBrowser?.Invoke();
+        }
 
         /// <summary>
         /// Start the authorization flow.  This is an async method and should be awaited.
@@ -63,7 +94,7 @@ namespace Okta.Xamarin
         /// <returns>In case of successful authorization, this Task will return a valid <see cref="OktaState"/>.  Clients are responsible for further storage and maintenance of the manager.</returns>
         public Task<OktaState> SignInWithBrowserAsync()
         {
-            validator.Validate(Config);
+            Validator.Validate(Config);
 
             currentTask = new TaskCompletionSource<OktaState>();
             GenerateStateCodeVerifierAndChallenge();
@@ -80,7 +111,7 @@ namespace Okta.Xamarin
         /// <returns>Task which tracks the progress of the logout</returns>
         public Task<OktaState> SignOutOfOktaAsync(OktaState stateManager)
         {
-            validator.Validate(this.Config);
+            Validator.Validate(this.Config);
             this.currentTask = new TaskCompletionSource<OktaState>();
             if (!stateManager.IsAuthenticated)
             {
@@ -92,6 +123,19 @@ namespace Okta.Xamarin
             this.LaunchBrowser(this.GenerateLogoutUrl(new LogoutOptions(stateManager, this.Config, this.State)));
             return currentTask.Task;
         }
+
+		public void ValidateConfig()
+		{
+			if(Validator == null)
+			{
+				throw new ArgumentNullException("Validator");
+			}
+			if(Config == null)
+			{
+				throw new ArgumentNullException("Config");
+			}
+			Validator.Validate(Config);
+		}
 
         /// <summary>
         /// Complete the authorization of a valid session obtained via the <see cref="https://github.com/okta/okta-auth-dotnet">AuthN SDK</see>.
@@ -188,7 +232,7 @@ namespace Okta.Xamarin
             var content = new FormUrlEncodedContent(kvdata);
 
             var request = new HttpRequestMessage(HttpMethod.Post, this.Config.GetAccessTokenUrl())
-                {Content = content, Method = HttpMethod.Post};
+            { Content = content, Method = HttpMethod.Post };
             HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
 
             string text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -225,28 +269,28 @@ namespace Okta.Xamarin
         /// <summary>
         /// The internal OAuth state used to track requests from this client
         /// </summary>
-        private string State { get; set; }
+        protected string State { get; set; }
 
         /// <summary>
         /// The PKCE code that is used to verify the integrity of the token exchange
         /// </summary>
-        private string CodeVerifier { get; set; }
+        protected string CodeVerifier { get; set; }
 
         /// <summary>
         /// A SHA256 hash of the <see cref="CodeVerifier"/> used for PKCE
         /// </summary>
-        private string CodeChallenge { get; set; }
+        protected string CodeChallenge { get; set; }
 
 
         /// <summary>
         /// Tracks the current state machine used by <see cref="SignInWithBrowserAsync"/> across the login callback
         /// </summary>
-        private TaskCompletionSource<OktaState> currentTask;
+        protected TaskCompletionSource<OktaState> currentTask;
 
         /// <summary>
         /// Generates a cryptographically random <see cref="State"/> and <see cref="CodeVerifier"/>, and computes the <see cref="CodeChallenge"/> for use in PKCE
         /// </summary>
-        private void GenerateStateCodeVerifierAndChallenge()
+        protected void GenerateStateCodeVerifierAndChallenge()
         {
             State = GenerateSecureRandomString(16);
             CodeVerifier = GenerateSecureRandomString(64);
@@ -257,7 +301,7 @@ namespace Okta.Xamarin
             }
         }
 
-        private string GenerateSecureRandomString(int byteCount)
+        protected string GenerateSecureRandomString(int byteCount)
         {
             using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
             {
@@ -268,7 +312,7 @@ namespace Okta.Xamarin
             }
         }
 
-        private string GenerateLogoutUrl(LogoutOptions logoutOptions)
+        protected string GenerateLogoutUrl(LogoutOptions logoutOptions)
         {
             var baseUri = new Uri(this.Config.GetLogoutUrl());
             var logoutUri = $"{baseUri.AbsoluteUri}{logoutOptions.ToQueryString(true)}";
@@ -279,7 +323,7 @@ namespace Okta.Xamarin
         /// Determines the AuthorizeUrl including login query parameters based on the <see cref="Config"/>
         /// </summary>
         /// <returns>The url ready to be used for login</returns>
-        private string GenerateAuthorizeUrl()
+        protected string GenerateAuthorizeUrl()
         {
             var baseUri = new Uri(this.Config.GetAuthorizeUrl());
             string url = baseUri.AbsoluteUri;
@@ -385,7 +429,7 @@ namespace Okta.Xamarin
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Call after a user logs in and is redirected back to the app via an intent or universal link.  This method determines the appropriate <see cref="OidcClient"/> to continue the flow based on the <see cref="State"/>.
         /// </summary>

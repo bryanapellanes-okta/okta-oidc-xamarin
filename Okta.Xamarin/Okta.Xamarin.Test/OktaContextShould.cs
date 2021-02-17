@@ -15,7 +15,7 @@ namespace Okta.Xamarin.Test
         [Fact]
         public void RaiseSignInEventsOnSignIn()
         {
-            OidcClient client = new OidcClient(new OktaConfig("testoktaid", "https://dev-00000.oktapreview.com", "com.test:/redirect", "com.test:/logout"));
+			TestOidcClient client = new TestOidcClient(new OktaConfig("testoktaid", "https://dev-00000.oktapreview.com", "com.test:/redirect", "com.test:/logout"));
             OktaContext.Init(client);
             bool? signInStartedEventRaised = false;
             bool? signInCompletedEventRaised = false;
@@ -32,7 +32,7 @@ namespace Okta.Xamarin.Test
         [Fact]
         public void RaiseSignOutEventsOnSignOut()
         {
-            OidcClient client = new OidcClient(new OktaConfig("testoktaid", "https://dev-00000.oktapreview.com", "com.test:/redirect", "com.test:/logout"));
+			TestOidcClient client = new TestOidcClient(new OktaConfig("testoktaid", "https://dev-00000.oktapreview.com", "com.test:/redirect", "com.test:/logout"));
             OktaContext.Init(client);
             bool? signOutStartedEventRaised = false;
             bool? signOutCompletedEventRaised = false;

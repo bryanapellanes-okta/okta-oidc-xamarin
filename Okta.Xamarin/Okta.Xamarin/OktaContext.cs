@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -117,6 +118,16 @@ namespace Okta.Xamarin
         {
             Current.SignOutCompleted += signOutCompletedEventHandler;
         }
+
+        public TinyIoCContainer Container { get; set; }
+
+        public string RuntimePlatform { get; set; }
+
+		private Dictionary<string, Action> initializers = new Dictionary<string, Action>();
+		public void AddInitializer(string platform, Action action)
+		{
+			initializers.Add(platform, action);
+		}
 
         /// <summary>
         /// Initialize OktaContext.Current with the specified default client.

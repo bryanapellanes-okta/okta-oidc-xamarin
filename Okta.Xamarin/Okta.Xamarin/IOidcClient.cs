@@ -10,7 +10,7 @@ namespace Okta.Xamarin
     /// <summary>
     /// An interface defining the cross-platform surface area of the OidcClient
     /// </summary>
-    public interface IOidcClient
+    public interface IOidcClient : IRuntimePlatform
     {
         /// <summary>
         /// Gets the OAuthException that occurred if any.  Will be null if no exception occurred.
@@ -41,5 +41,5 @@ namespace Okta.Xamarin
         /// <param name="stateManager">The state manager associated with the login that you wish to log out</param>
         /// <returns>Task which tracks the progress of the logout</returns>
         Task<OktaState> SignOutOfOktaAsync(OktaState stateManager);
-    }
+	}
 }

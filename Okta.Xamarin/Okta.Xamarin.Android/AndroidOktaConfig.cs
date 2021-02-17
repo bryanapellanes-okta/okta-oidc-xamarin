@@ -7,13 +7,15 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Xamarin.Forms;
 
 namespace Okta.Xamarin
 {
 	/// <summary>
 	/// Stores configuration for the Okta Android OIDC client
 	/// </summary>
-	public partial class OktaConfig : IOktaConfig
+	[RuntimePlatform(Device.Android)]
+	public class AndroidOktaConfig : OktaConfig
 	{
 		/// <summary>
 		/// Instantiates a <see cref="OktaConfig"/> from an XML string and validates it.  Throws an exception if required fields are missing or invalid.

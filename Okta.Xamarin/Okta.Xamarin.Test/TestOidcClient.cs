@@ -9,43 +9,17 @@ using System.Threading.Tasks;
 
 namespace Okta.Xamarin
 {
-    public partial class OidcClient
+    public class TestOidcClient : OidcClient
     {
-        /// <summary>
-        /// A hook that is called when launching the browser
-        /// </summary>
-        public Action<string> OnLaunchBrowser { get; set; }
-        /// <summary>
-        /// A hook that is called when closing the browser
-        /// </summary>
-        public Action OnCloseBrowser { get; set; }
-
-        /// <summary>
-        /// Launches a browser to the specified url
-        /// </summary>
-        /// <param name="url">The url to launch in a Chrome custom tab</param>
-        private void LaunchBrowser(string url)
-        {
-            OnLaunchBrowser?.Invoke(url);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OidcClient"/> class using the specified <see cref="OktaConfig"/>.
-        /// </summary>
-        /// <param name="config">The <see cref="OktaConfig"/> to use for this client.  The config must be valid at the time this is called.</param>
-        public OidcClient(IOktaConfig config)
-        {
-            this.Config = config;
-            validator.Validate(Config);
-        }
-
-        /// <summary>
-        /// Called to close the browser used for login after the redirect
-        /// </summary>
-        private void CloseBrowser()
-        {
-            OnCloseBrowser?.Invoke();
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="OidcClient"/> class using the specified <see cref="OktaConfig"/>.
+		/// </summary>
+		/// <param name="config">The <see cref="OktaConfig"/> to use for this client.  The config must be valid at the time this is called.</param>
+		public TestOidcClient(IOktaConfig config, OktaConfigValidator<IOktaConfig> oktaConfigValidator = null) : base(config, oktaConfigValidator)
+		{
+			this.Config = config;
+			Validator.Validate(Config);
+		}
 
         /// <summary>
         /// Provides access to the internal OAuth <see cref="State"/> used to track requests from this client
